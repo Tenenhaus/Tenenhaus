@@ -100,6 +100,14 @@ rgcca_stability <- function(rgcca_res,
 
   W <- W[!vapply(W, is.null, logical(1L))]
 
+  if (length(W) == 0) {
+    stop_rgcca(
+      "Unable to perform stability analysis. ",
+      "Try to remove variables that are missing or constant for most subjects ",
+      "or add some noise to your data."
+    )
+  }
+
   res <- format_bootstrap_list(W, rgcca_res)
   J <- length(rgcca_res$blocks)
 

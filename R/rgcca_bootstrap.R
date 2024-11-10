@@ -150,6 +150,14 @@ rgcca_bootstrap <- function(rgcca_res, n_boot = 100,
 
   W <- W[!vapply(W, is.null, logical(1L))]
 
+  if (length(W) == 0) {
+    stop_rgcca(
+      "Unable to perform bootstrap analysis. ",
+      "Try to remove variables that are missing or constant for most subjects ",
+      "or add some noise to your data."
+    )
+  }
+
   res <- format_bootstrap_list(W, rgcca_res)
   stats <- rgcca_bootstrap_stats(res, rgcca_res, length(W))
 
