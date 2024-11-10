@@ -8,7 +8,8 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
                              verbose = TRUE,
                              na.rm = TRUE, superblock = FALSE,
                              response = NULL, disjunction = NULL,
-                             n_iter_max = 1000, comp_orth = TRUE) {
+                             n_iter_max = 1000, comp_orth = TRUE,
+                             rank = 1, mode_orth = 1, separable = TRUE) {
   if (verbose) {
     scheme_str <- ifelse(is(scheme, "function"), "user-defined", scheme)
     cat(
@@ -74,6 +75,13 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
     )
   }
 
+  if (is.vector(rank)) {
+    rank <- matrix(
+      rep(rank, N + 1),
+      nrow = N + 1, J, byrow = TRUE
+    )
+  }
+
   # Whether primal or dual
   primal_dual <- matrix("primal", nrow = N + 1, ncol = J)
   primal_dual[which((sparsity == 1) & (nb_ind < matrix(
@@ -93,7 +101,9 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
                                     sparsity = sparsity[n, ],
                                     init = init, bias = bias, tol = tol,
                                     verbose = verbose, na.rm = na.rm,
-                                    n_iter_max = n_iter_max
+                                    n_iter_max = n_iter_max,
+                                    rank = rank[n, ], mode_orth = mode_orth,
+                                    separable = separable
     )
 
     # Store tau, crit
