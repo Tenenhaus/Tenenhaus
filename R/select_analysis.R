@@ -68,6 +68,7 @@ select_analysis <- function(rgcca_args, blocks) {
       mode_orth <- check_mode_orth(mode_orth, blocks)
       param <- "tau"
       penalty <- tau
+      comp_orth <- TRUE
       superblock <- FALSE
     },
     "pca" = {
