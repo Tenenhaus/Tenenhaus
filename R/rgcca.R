@@ -172,6 +172,9 @@
 #' iterations.
 #' @param comp_orth A logical value indicating if the deflation should lead to
 #' orthogonal block components or orthogonal block weight vectors.
+#' @param simultaneous A logical value indicating if a simultaneous algorithm
+#' should be used to find all components or if a sequential algorithm should
+#' be used instead. Default value is FALSE.
 #' @param A Deprecated argument, please use blocks instead.
 #' @param C Deprecated argument, please use connection instead.
 #' @return A fitted rgcca object.
@@ -433,6 +436,7 @@ rgcca <- function(blocks, connection = NULL, tau = 1, ncomp = 1,
                   superblock = FALSE,
                   NA_method = "na.ignore", quiet = TRUE,
                   n_iter_max = 1000, comp_orth = TRUE,
+                  simultaneous = FALSE,
                   A = NULL, C = NULL) {
   # Check for deprecated arguments
   if (!missing(A)) {
@@ -486,7 +490,12 @@ rgcca <- function(blocks, connection = NULL, tau = 1, ncomp = 1,
   gcca_args[["blocks"]] <- blocks
   gcca_args[["disjunction"]] <- opt$disjunction
   gcca_args[[opt$param]] <- rgcca_args[[opt$param]]
-  func_out <- do.call(rgcca_outer_loop, gcca_args)
+
+  if (rgcca_args$simultaneous) {
+    func_out <- do.call(simultaneous_rgcca_loop, gcca_args)
+  } else {
+    func_out <- do.call(rgcca_outer_loop, gcca_args)
+  }
 
   ### Format the output
   func_out <- format_output(func_out, rgcca_args, opt, blocks)

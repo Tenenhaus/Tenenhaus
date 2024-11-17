@@ -5,11 +5,13 @@
 #' @param dual A logical value. dual = TRUE enables a dual initialization (i.e.
 #' the first left singular vector is used if n<p and the first right singular
 #' vector is used otherwise.
+#' @param ncomp A positive integer value. Corresponds to the number of
+#' components sought by the method.
 #' @return A vector of initialization
 #' @title Initialization of the S/RGCCA algorithm by Singular Value
 #' Decomposition
 #' @noRd
-initsvd <- function(X, dual = TRUE) {
+initsvd <- function(X, dual = TRUE, ncomp = 1) {
   if (any(is.na(X))) {
     indNA <- which(is.na(X), arr.ind = TRUE)
     vecMeans <- colMeans(X, na.rm = TRUE)
@@ -21,10 +23,10 @@ initsvd <- function(X, dual = TRUE) {
 
   if (dual) {
     ifelse(n >= p,
-      return(svd(X, nu = 0, nv = 1)$v),
-      return(svd(X, nu = 1, nv = 0)$u)
+      return(svd(X, nu = 0, nv = ncomp)$v),
+      return(svd(X, nu = ncomp, nv = 0)$u)
     )
   } else {
-    return(svd(X, nu = 0, nv = 1)$v)
+    return(svd(X, nu = 0, nv = ncomp)$v)
   }
 }

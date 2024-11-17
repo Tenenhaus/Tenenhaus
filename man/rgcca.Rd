@@ -24,6 +24,7 @@ rgcca(
   quiet = TRUE,
   n_iter_max = 1000,
   comp_orth = TRUE,
+  simultaneous = FALSE,
   A = NULL,
   C = NULL
 )
@@ -164,6 +165,10 @@ iterations.}
 
 \item{comp_orth}{A logical value indicating if the deflation should lead to
 orthogonal block components or orthogonal block weight vectors.}
+
+\item{simultaneous}{A logical value indicating if a simultaneous algorithm
+should be used to find all components or if a sequential algorithm should
+be used instead. Default value is FALSE.}
 
 \item{A}{Deprecated argument, please use blocks instead.}
 

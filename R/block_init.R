@@ -39,3 +39,14 @@ block_init.dual_regularized_block <- function(x, init = "svd") {
   x$M <- ginv(x$tau * diag(x$n) + (1 - x$tau) * x$K / x$N)
   NextMethod()
 }
+
+#' @export
+block_init.sim_block <- function(x, init = "svd") {
+  if (init == "svd") {
+    x$a <- initsvd(x$x, dual = FALSE, ncomp = x$ncomp)
+  } else {
+    x$a <- matrix(rnorm(x$p * x$ncomp), nrow = x$p)
+  }
+
+  return(block_project(x))
+}
