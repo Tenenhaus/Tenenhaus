@@ -438,6 +438,13 @@ rgcca <- function(blocks, connection = NULL, tau = 1, ncomp = 1,
                   n_iter_max = 1000, comp_orth = TRUE,
                   simultaneous = FALSE,
                   A = NULL, C = NULL) {
+  # TODO:
+  #   - Add documentation
+  #   - Add examples
+  #   - Add tests (showing that criterion is higher than sequential for instance)
+  #   - Add reference to Arnaud's PhD thesis
+  #   - Add regularization and dual implementation
+  #   - Add parameter checks and modifications when simultaneous is TRUE
   # Check for deprecated arguments
   if (!missing(A)) {
     warning("Argument A is deprecated, use blocks instead.")
