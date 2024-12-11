@@ -70,11 +70,27 @@ check_compx <- function(x, y, ncomp, blockx) {
   return(res)
 }
 
+check_confounders <- function(confounders, blocks){
+  if (!is.matrix(confounders)) stop_rgcca("confounders matrix must be a matrix", exit_code = 103) #TODO check exit_code
+  #TODO are NA allowed?
+  #TODO check if nrow = n?
+  
+  is_K <- FALSE
+  # Check whether the matrix is K
+  #if (NROW(confounders) == NCOL(confounders) && confounders == t(confounders)) is_K <- TRUE
+  if (isSymmetric.matrix(confounders)) is_K <- TRUE #TODO do I have to use fct unname like in check_connection?
+  #TODO need to check if the matrix is positive definite?
+  
+  if(is_K == FALSE) confounders <- tcrossprod(confounders)
+  
+  return(confounders)
+}
+
 # Check the format of the connection matrix
 check_connection <- function(C, blocks) {
   msg <- "connection matrix C must"
 
-  if (!is.matrix(C)) stop_rgcca(msg, " be a matrix.", exit_code = 103)
+  if (!is.matrix(C)) stop_rgcca(msg, " be a matrix.", exit_code = 103) #TODO check why is function paste not used?
 
   if (!isSymmetric.matrix(unname(C))) {
     stop_rgcca(paste(msg, "be symmetric."), exit_code = 103)

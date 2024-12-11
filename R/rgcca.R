@@ -430,7 +430,8 @@ rgcca <- function(blocks, connection = NULL, tau = 1, ncomp = 1,
                   bias = TRUE, tol = 1e-08, verbose = FALSE,
                   scale_block = "inertia", method = "rgcca",
                   sparsity = 1, response = NULL,
-                  superblock = FALSE,
+                  superblock = FALSE, 
+                  confounders = NULL, penalty_coef = 0,
                   NA_method = "na.ignore", quiet = TRUE,
                   n_iter_max = 1000, comp_orth = TRUE,
                   A = NULL, C = NULL) {
@@ -480,7 +481,8 @@ rgcca <- function(blocks, connection = NULL, tau = 1, ncomp = 1,
   ### Call the gcca function
   gcca_args <- rgcca_args[c(
     "connection", "ncomp", "scheme", "init", "bias", "tol",
-    "verbose", "superblock", "response", "n_iter_max", "comp_orth"
+    "verbose", "superblock", "response", "n_iter_max", "comp_orth",
+    "confounders", "penalty_coef"
   )]
   gcca_args[["na.rm"]] <- na.rm
   gcca_args[["blocks"]] <- blocks

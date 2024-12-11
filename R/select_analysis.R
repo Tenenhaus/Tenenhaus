@@ -31,8 +31,10 @@ select_analysis <- function(rgcca_args, blocks) {
   connection <- rgcca_args$connection
   superblock <- rgcca_args$superblock
   scale_block <- rgcca_args$scale_block
+  confounders <- rgcca_args$confounders
+  penalty_coef <- rgcca_args$penalty_coef
 
-  if (length(blocks) == 1) {
+  if (length(blocks) == 1 && is.NULL(confounders)) {
     if (sparsity[1] == 1) {
       method <- "pca"
     } else {
@@ -40,12 +42,13 @@ select_analysis <- function(rgcca_args, blocks) {
     }
   }
 
-  method <- check_method(method)
+  method <- check_method(method) #TODO
 
   call <- list(
     ncomp = ncomp, scheme = scheme, tau = tau, sparsity = sparsity,
     superblock = superblock, connection = connection, response = response,
-    comp_orth = comp_orth, scale_block = scale_block
+    comp_orth = comp_orth, scale_block = scale_block, 
+    confounders = confounders, penalty_coef = penalty_coef
   )
   J <- length(blocks)
 
@@ -380,6 +383,10 @@ select_analysis <- function(rgcca_args, blocks) {
       comp_orth <- TRUE
       superblock <- FALSE
       connection <- connection_matrix(blocks, type = "pair")
+    },
+    "ac-rgcca" = {
+      param <- "tau"
+      penalty <- tau
     }
   )
 
@@ -452,7 +459,7 @@ select_analysis <- function(rgcca_args, blocks) {
 
   rgcca_args[[param]] <- penalty
 
-  rgcca_args <- modifyList(rgcca_args, list(
+  rgcca_args <- modifyList(rgcca_args, list( #TODO add new arguments here? only if they are modified in this function
     ncomp = ncomp,
     scheme = scheme,
     method = method,

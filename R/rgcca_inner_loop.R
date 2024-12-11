@@ -1,7 +1,8 @@
 rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
                              sparsity = rep(1, length(A)),
                              verbose = FALSE, init = "svd", bias = TRUE,
-                             tol = 1e-08, na.rm = TRUE, n_iter_max = 1000) {
+                             tol = 1e-08, na.rm = TRUE, n_iter_max = 1000,
+                             confounders = NULL, penalty_coef = rep(0, length(A))) {
   if (!is.numeric(tau)) {
     # From Schafer and Strimmer, 2005
     tau <- vapply(A, tau.estimate, na.rm = na.rm, FUN.VALUE = 1.0)
@@ -15,7 +16,7 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
 
   ### Initialization
   block_objects <- lapply(seq_along(A), function(j) {
-    create_block(A[[j]], j, bias, na.rm, tau[j], sparsity[j], tol)
+    create_block(A[[j]], j, bias, na.rm, tau[j], sparsity[j], tol, confounders)
   })
 
   block_objects <- lapply(block_objects, block_init, init = init)
@@ -25,6 +26,12 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
   iter <- 1
   crit <- NULL
   crit_old <- sum(C * g(crossprod(Y) / N))
+  if (!is.null(confounders)) {
+    crit_second_part <- sum(lapply(seq_along(Y), function(j) {
+      return(drop(penalty_coef[j] * t(Y[, j]) %*% confounders %*% Y[, j])) #TODO check if drop() is necessary
+    }))
+    crit_old <- crit_old - crit_second_part
+  }
   a_old <- lapply(block_objects, "[[", "a")
 
   repeat {
@@ -36,7 +43,14 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
     }
 
     # Print out intermediate fit
-    crit <- c(crit, sum(C * g(crossprod(Y) / N)))
+    if (!is.null(confounders)) {
+      new_crit <- sum(C * g(crossprod(Y) / N)) - sum(lapply(seq_along(Y), function(j) {
+        return(drop(penalty_coef[j] * t(Y[, j]) %*% confounders %*% Y[, j])) #TODO check drop()
+      }))
+      crit <- c(crit, new_crit)
+    } else {
+      crit <- c(crit, sum(C * g(crossprod(Y) / N)))
+    }
 
     if (verbose) {
       cat(

@@ -37,7 +37,9 @@ get_rgcca_args <- function(object, default_args = list()) {
       n_iter_max = default_args$n_iter_max,
       connection = default_args$connection,
       superblock = default_args$superblock,
-      scale_block = default_args$scale_block
+      confounders = default_args$confounders,
+      scale_block = default_args$scale_block,
+      penalty_coef = default_args$penalty_coef
     )
 
     rgcca_args$init <- check_char(rgcca_args$init, "init", c("svd", "random"))
@@ -54,7 +56,12 @@ get_rgcca_args <- function(object, default_args = list()) {
     rgcca_args$blocks <- check_blocks(
       rgcca_args$blocks, add_NAlines = TRUE,
       quiet = rgcca_args$quiet, response = rgcca_args$response
-    )
+    ) #TODO
+    
+    rgcca_args$confounders <- check_confounders(
+      rgcca_args$confounders, rgcca_args$blocks) #TODO
+    
+    #TODO check hyperparameter penalty_coef
 
     check_integer("tol", rgcca_args$tol, float = TRUE, min = 0)
     check_integer("n_iter_max", rgcca_args$n_iter_max, min = 1)

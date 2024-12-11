@@ -8,7 +8,8 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
                              verbose = TRUE,
                              na.rm = TRUE, superblock = FALSE,
                              response = NULL, disjunction = NULL,
-                             n_iter_max = 1000, comp_orth = TRUE) {
+                             n_iter_max = 1000, comp_orth = TRUE,
+                             confounders = NULL, penalty_coef = rep(0, length(blocks))) {
   if (verbose) {
     scheme_str <- ifelse(is(scheme, "function"), "user-defined", scheme)
     cat(
@@ -57,7 +58,7 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
   } else {
     P <- lapply(seq(J), function(b) c())
   }
-
+  
   # Save computed shrinkage parameter in a new variable
   computed_tau <- tau
   if (is.vector(tau)) {
@@ -76,10 +77,10 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
 
   # Whether primal or dual
   primal_dual <- matrix("primal", nrow = N + 1, ncol = J)
-  primal_dual[which((sparsity == 1) & (nb_ind < matrix(
+  primal_dual[which((penalty_coef == 0) & (sparsity == 1) & (nb_ind < matrix(
     pjs, nrow = N + 1, ncol = J, byrow = TRUE
-  )))]
-
+  )))] #TODO check: what is the purpose of this line? shouldn't the selected elements be assigned "dual"?
+  
   ##### Computation of RGCCA components #####
   for (n in seq(N + 1)) {
     if (verbose) {
@@ -93,7 +94,8 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
                                     sparsity = sparsity[n, ],
                                     init = init, bias = bias, tol = tol,
                                     verbose = verbose, na.rm = na.rm,
-                                    n_iter_max = n_iter_max
+                                    n_iter_max = n_iter_max,
+                                    confounders, penalty_coef
     )
 
     # Store tau, crit
