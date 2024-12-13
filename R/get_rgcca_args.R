@@ -41,7 +41,7 @@ get_rgcca_args <- function(object, default_args = list()) {
       scale_block = default_args$scale_block,
       penalty_coef = default_args$penalty_coef
     )
-
+    
     rgcca_args$init <- check_char(rgcca_args$init, "init", c("svd", "random"))
     rgcca_args$NA_method <- check_char(
       rgcca_args$NA_method, "NA_method", c("na.ignore", "na.omit")
@@ -58,10 +58,12 @@ get_rgcca_args <- function(object, default_args = list()) {
       quiet = rgcca_args$quiet, response = rgcca_args$response
     ) #TODO
     
-    rgcca_args$confounders <- check_confounders(
+    if (!is.null(rgcca_args$confounders)) {
+      rgcca_args$confounders <- check_confounders(
       rgcca_args$confounders, rgcca_args$blocks) #TODO
+    }
     
-    #TODO check hyperparameter penalty_coef
+    #TODO check hyperparameter penalty_coef (positive + check length)
 
     check_integer("tol", rgcca_args$tol, float = TRUE, min = 0)
     check_integer("n_iter_max", rgcca_args$n_iter_max, min = 1)

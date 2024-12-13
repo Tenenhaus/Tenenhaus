@@ -45,17 +45,19 @@ new_sparse_block <- function(x, j, sparsity, tol = 1e-08, ...) {
   )
 }
 
-new_ac_block <- function(x, j, tau, confounders, ...) {
-  new_block(x, j, tau = tau, M = NULL, B = NULL, confounders = confounders, 
-            penalty_coef = NULL, f = NULL, ..., class = "ac_block")
+new_ac_block <- function(x, j, tau, confounders, penalty_coef, ...) {
+  new_block(x, j, tau = tau, M = NULL, M_inv = NULL, B = NULL, 
+            f = NULL, sqrt_M = NULL, sqrt_M_inv = NULL, mu = NULL, 
+            confounders = confounders, penalty_coef = penalty_coef, ..., 
+            class = "ac_block")
 }
 
 ### Utility method to choose the adequate class
-create_block <- function(x, j, bias, na.rm, tau, sparsity, tol, confounders = NULL) {
+create_block <- function(x, j, bias, na.rm, tau, sparsity, tol, confounders, penalty_coef) {
   if (sparsity < 1) {
     res <- new_sparse_block(x, j, sparsity, tol, bias = bias, na.rm = na.rm)
   } else if (!is.null(confounders)) {
-    res <- new_ac_block(x, j, tau, confounders = confounders)
+    res <- new_ac_block(x, j, tau, confounders = confounders, penalty_coef = penalty_coef)
   } else if (NROW(x) > NCOL(x)) {
     if (tau < 1) {
       res <- new_primal_regularized_block(x, j, tau, bias = bias, na.rm = na.rm)

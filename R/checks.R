@@ -74,13 +74,14 @@ check_confounders <- function(confounders, blocks){
   if (!is.matrix(confounders)) stop_rgcca("confounders matrix must be a matrix", exit_code = 103) #TODO check exit_code
   #TODO are NA allowed?
   #TODO check if nrow = n?
+  #TODO check rownames (compare with blocks)
   
   is_K <- FALSE
   # Check whether the matrix is K
-  #if (NROW(confounders) == NCOL(confounders) && confounders == t(confounders)) is_K <- TRUE
   if (isSymmetric.matrix(confounders)) is_K <- TRUE #TODO do I have to use fct unname like in check_connection?
   #TODO need to check if the matrix is positive definite?
   
+  # Compute linear kernel
   if(is_K == FALSE) confounders <- tcrossprod(confounders)
   
   return(confounders)

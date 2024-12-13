@@ -57,13 +57,14 @@ block_project.sparse_block <- function(x) {
 
 #' @export
 block_project.ac_block <- function(x) {
-  M <- x$tau * diag(x$p) + (1 - x$tau) * pm(t(x$x), x$x, na.rm = x$na.rm) / x$N
-  x$a <- M %*% (x$f + pm(sqrtm(M), x$a, na.rm = x$na.rm)) / drop(sqrt(
-    t(x$f + pm(sqrtm(M), x$a, na.rm = x$na.rm)) %*% 
-      M %*% M %*% M %*% 
-      (x$f + pm(sqrtm(M), x$a, na.rm = x$na.rm)) #TODO replace matrix product by power (%^% from expm)
-  ))
-  
-  x$Y <- pm(x$x, x$a, na.rm = x$na.rm)
-  return(x)
+  if (is.null(x$f)) {
+    NextMethod()
+  } else {
+    v <- pm(x$sqrt_M, x$a, na.rm = x$na.rm)
+    x$a <- (x$sqrt_M_inv %*% x$f + x$a) / drop(sqrt(
+      crossprod(x$f + v)))
+    
+    x$Y <- pm(x$x, x$a, na.rm = x$na.rm)
+    return(x)
+  }
 }

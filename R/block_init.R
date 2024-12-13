@@ -1,8 +1,8 @@
 #' @importFrom MASS ginv
-#' @importFrom expm sqrtm 
-#TODO remove last import if I manage to use fct sqrt_matrix from RGCCA\tests\test_rgcca.R
 
 block_init <- function(x, init = "svd") {
+  print("block_init")
+  print(class(x))
   UseMethod("block_init")
 }
 
@@ -13,7 +13,7 @@ block_init.block <- function(x, init = "svd") {
   } else {
     x$a <- rnorm(x$p)
   }
-
+  print("block_init.block is being used")
   return(block_project(x))
 }
 
@@ -24,7 +24,7 @@ block_init.dual_block <- function(x, init = "svd") {
   } else {
     x$alpha <- rnorm(x$n)
   }
-
+  print("block_init.dual_block is being used")
   return(block_project(x))
 }
 
@@ -33,24 +33,40 @@ block_init.primal_regularized_block <- function(x, init = "svd") {
   x$M <- ginv(
     x$tau * diag(x$p) + (1 - x$tau) * pm(t(x$x), x$x, na.rm = x$na.rm) / x$N
   )
+  print("block_init.primal_regularized_block is being used")
   NextMethod()
 }
 
 #' @export
 block_init.dual_regularized_block <- function(x, init = "svd") {
   x$M <- ginv(x$tau * diag(x$n) + (1 - x$tau) * x$K / x$N)
+  print("block_init.dual_regularized_block is being used")
   NextMethod()
 }
 
 #' @export
 block_init.ac_block <- function(x, init = "svd") {
-  x$M <- ginv(
-    x$tau * diag(x$p) + (1 - x$tau) * pm(t(x$x), x$x, na.rm = x$na.rm) / x$N
-  )
-  XM_tmp <- pm(x$x, sqrtm(x$M), na.rm = x$na.rm)
+  print("block_init.ac_block is being used")
+  x$M <- x$tau * diag(x$p) + (1 - x$tau) * pm(t(x$x), x$x, na.rm = x$na.rm) / x$N
+  x$M_inv <- ginv(x$M)
+  x$sqrt_M <- sqrt_matrix(x$M)
+  x$sqrt_M_inv <- sqrt_matrix(x$M_inv) #TODO check if result is the same with sqrt_matrix(x$M, inv = T)
+
+  XM_tmp <- pm(x$x, x$sqrt_M_inv, na.rm = x$na.rm)
   x$B <- pm(
     t(XM_tmp), pm(
       x$confounders, XM_tmp, na.rm = x$na.rm), 
     na.rm = x$na.rm) #TODO should I use crossprod instead of pm?
-  NextMethod() #TODO check if this calls the right method (block_init.block)
+  
+  x$mu <- x$penalty_coef * 
+    eigen(x = x$B, symmetric = T, only.values = T)$values[1]
+  
+  #NextMethod()
+  
+  if (init == "svd") {
+    x$a <- initsvd(x$x, dual = FALSE)
+  } else {
+    x$a <- rnorm(x$p)
+  }
+  return(block_project(x))
 }
