@@ -15,6 +15,9 @@ scale_lambda1 <- function(A, sqrt_N, scale, na.rm) {
       symmetric = TRUE, only.values = TRUE
     )$values[1]
   ))
+  if (lambda == 0) {
+    return(A)
+  }
   y <- A / lambda
   if (scale) {
     attr(y, "scaled:scale") <- attr(A, "scaled:scale") * lambda

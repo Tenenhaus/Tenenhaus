@@ -9,6 +9,9 @@ scale_inertia <- function(A, sqrt_N, scale, na.rm) {
     z <- A
   }
   fac <- 1 / sqrt_N * norm(z, type = "F")
+  if (fac == 0) {
+    return(A)
+  }
   y <- A / fac
   if (scale) {
     attr(y, "scaled:scale") <- attr(A, "scaled:scale") * fac
