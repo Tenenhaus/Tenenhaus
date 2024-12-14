@@ -15,7 +15,7 @@
 rgcca_bootstrap_k <- function(rgcca_res, inds = NULL, type = "loadings") {
   if (length(inds) > 0) {
     rgcca_res$call$blocks <- lapply(rgcca_res$call$blocks, function(x) {
-      y <- x[inds, , drop = FALSE]
+      y <- subset_block_rows(x, inds, drop = FALSE)
       rownames(y) <- paste("S", seq_along(inds))
       return(y)
     })
@@ -28,12 +28,12 @@ rgcca_bootstrap_k <- function(rgcca_res, inds = NULL, type = "loadings") {
   if (type == "loadings") {
     Y <- lapply(
       seq_along(A),
-      function(j) pm(rgcca_res_boot$blocks[[j]], A[[j]])
+      function(j) pm(to_mat(rgcca_res_boot$blocks[[j]]), A[[j]])
     )
     L <- lapply(
       seq_along(A),
       function(j) {
-        cor2(rgcca_res_boot$blocks[[j]], Y[[j]])
+        cor2(to_mat(rgcca_res_boot$blocks[[j]]), Y[[j]])
       }
     )
   } else {

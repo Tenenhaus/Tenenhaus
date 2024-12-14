@@ -4,7 +4,7 @@ subset_block_rows <- function(x, rows, drop = TRUE) {
 
 #' @export
 subset_block_rows.numeric <- function(x, rows, drop = TRUE) {
-  return(x[rows])
+  return(x[rows, drop = drop])
 }
 
 #' @export
@@ -16,5 +16,13 @@ subset_block_rows.data.frame <- function(x, rows, drop = TRUE) {
 
 #' @export
 subset_block_rows.array <- function(x, rows, drop = TRUE) {
-  apply(x, -1, "[", rows, drop = drop)
+  dim_x <- dim(x)
+  dn <- dimnames(x)
+  x <- apply(x, -1, "[", rows, drop = drop)
+  if (!drop && length(dim(x)) < length(dim_x)) {
+    x <- array(x, dim = c(1, dim_x[-1]))
+    rownames(x) <- ifelse(is.numeric(rows), dn[[1]][rows], rows)
+    dimnames(x)[-1] <- dn[-1]
+  }
+  return(x)
 }

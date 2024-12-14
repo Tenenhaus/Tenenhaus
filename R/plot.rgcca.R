@@ -209,17 +209,6 @@ plot.rgcca <- function(x, type = "weights",
                        show_var_names = TRUE, repel = FALSE,
                        display_blocks = seq_along(x$call$blocks),
                        expand = 1, show_arrows = TRUE, ...) {
-  ### Define utility function to get named matrix out of array block
-  to_mat <- function(x, block) {
-    if (is.matrix(x$blocks[[block]])) {
-      return(x$blocks[[block]])
-    }
-    z <- matrix(x$blocks[[block]], nrow = nrow(x$blocks[[block]]))
-    rownames(z) <- rownames(x$blocks[[block]])
-    colnames(z) <- rownames(x$a[[block]])
-    return(z)
-  }
-
   ### Define data.frame generating functions
   df_sample <- function(x, block, comp, response, obj = "Y") {
     data.frame(
@@ -233,13 +222,13 @@ plot.rgcca <- function(x, type = "weights",
     df <- data.frame(
       x = do.call(rbind, Map(function(i, j) {
         cor2(
-          subset_block_rows(to_mat(x, i), rownames(x$Y[[j]])),
+          subset_block_rows(to_mat(x$blocks[[i]]), rownames(x$Y[[j]])),
           x$Y[[j]][, comp]
         )
       }, display_blocks, block)),
       response = num_block,
       y = do.call(
-        c, lapply(display_blocks, function(j) colnames(to_mat(x, j)))
+        c, lapply(display_blocks, function(j) colnames(to_mat(x$blocks[[j]])))
       )
     )
 
@@ -252,7 +241,9 @@ plot.rgcca <- function(x, type = "weights",
   df_weight <- function(x, block, comp, num_block, display_order) {
     df <- data.frame(
       x = unlist(lapply(x$a[block], function(z) z[, comp[1]])),
-      y = do.call(c, lapply(block, function(j) colnames(to_mat(x, j)))),
+      y = do.call(c, lapply(
+        block, function(j) colnames(to_mat(x$blocks[[j]]))
+      )),
       response = num_block
     )
     df <- df[df$x != 0, ]
@@ -494,7 +485,7 @@ plot.rgcca <- function(x, type = "weights",
       )
 
       # Rescale weigths
-      var_tot <- sum(diag(var(to_mat(x, block[1]), na.rm = TRUE)))
+      var_tot <- sum(diag(var(to_mat(x$blocks[[block[1]]]), na.rm = TRUE)))
       a <- data.matrix(df$a[, c(1, 2)]) %*% diag(sqrt(
         var_tot * x$AVE$AVE_X[[block[1]]][comp]
       ))

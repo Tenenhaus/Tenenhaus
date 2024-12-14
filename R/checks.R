@@ -266,7 +266,7 @@ check_ncomp <- function(ncomp, blocks, min = 1, superblock = FALSE,
 check_sign_comp <- function(rgcca_res, w) {
   y <- lapply(
     seq_along(rgcca_res$a),
-    function(i) pm(rgcca_res$blocks[[i]], w[[i]])
+    function(i) pm(to_mat(rgcca_res$blocks[[i]]), w[[i]])
   )
 
   w[seq_along(w)] <- lapply(seq_along(w), function(i) {

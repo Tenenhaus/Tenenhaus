@@ -39,4 +39,3 @@ scaling <- function(blocks, scale = TRUE, bias = TRUE,
 
   return(blocks)
 }
-
