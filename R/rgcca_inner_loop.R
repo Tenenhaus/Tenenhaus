@@ -89,9 +89,9 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
   a <- lapply(block_objects, "[[", "a")
   Y <- do.call(cbind, lapply(block_objects, "[[", "Y"))
   factors <- lapply(block_objects, "[[", "factors")
-  weights <- lapply(block_objects, "[[", "weights")
+  lambda <- lapply(block_objects, "[[", "lambda")
 
   return(list(
-    Y = Y, a = a, factors = factors, weights = weights, crit = crit, tau = tau
+    Y = Y, a = a, factors = factors, lambda = lambda, crit = crit, tau = tau
   ))
 }

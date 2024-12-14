@@ -48,7 +48,7 @@ new_sparse_block <- function(x, j, sparsity, tol = 1e-08, ...) {
 new_tensor_block <- function(x, j, rank, mode_orth, ..., class = character()) {
   new_block(
     x, j, rank = rank, mode_orth = mode_orth, factors = NULL,
-    weights = NULL, ..., class = c(class, "tensor_block")
+    lambda = NULL, ..., class = c(class, "tensor_block")
   )
 }
 

@@ -50,7 +50,7 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
   crit <- list()
   R <- blocks
 
-  a <- Y <- weights <- lapply(seq(J), function(b) c())
+  a <- Y <- lambda <- lapply(seq(J), function(b) c())
   factors <- lapply(seq(J), function(b) {
     lapply(seq_along(dim(R[[b]])[-1]), function(m) NULL)
   })
@@ -112,7 +112,7 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
     computed_tau[n, ] <- gcca_result$tau
     crit[[n]] <- gcca_result$crit
 
-    # Store Y, a, factors and weights
+    # Store Y, a, factors and lambda
     a <- lapply(seq(J), function(b) cbind(a[[b]], gcca_result$a[[b]]))
     Y <- lapply(seq(J), function(b) cbind(Y[[b]], gcca_result$Y[, b]))
     factors <- lapply(seq(J), function(b) {
@@ -120,8 +120,8 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
         cbind(factors[[b]][[m]], gcca_result$factors[[b]][[m]])
       })
     })
-    weights <- lapply(
-      seq(J), function(b) cbind(weights[[b]], gcca_result$weights[[b]])
+    lambda <- lapply(
+      seq(J), function(b) cbind(lambda[[b]], gcca_result$lambda[[b]])
     )
 
     # Deflation procedure
@@ -133,7 +133,7 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
   }
 
   # If there is a superblock and weight vectors are orthogonal, it is possible
-  # to have non meaningful weights associated to blocks that have been set to
+  # to have non meaningful lambda associated to blocks that have been set to
   # zero by the deflation
   if (superblock && !comp_orth) {
     a <- lapply(a, function(x) {
@@ -159,7 +159,7 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
     a = a,
     astar = astar,
     factors = factors,
-    weights = weights,
+    lambda = lambda,
     tau = computed_tau,
     crit = crit, primal_dual = primal_dual
   )

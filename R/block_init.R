@@ -57,7 +57,7 @@ block_init.tensor_block <- function(x, init = "svd") {
       }
     })
   }
-  x$weights <- rep(1 / sqrt(x$rank), x$rank)
+  x$lambda <- rep(1 / sqrt(x$rank), x$rank)
 
   return(block_project(x))
 }
@@ -79,11 +79,11 @@ block_init.regularized_tensor_block <- function(x, init = "svd") {
   }
   x$M <- x$tau + (1 - x$tau) * x$M / x$N
 
-  # Initialize the factors and weights using the tau = 1 strategy
+  # Initialize the factors and lambda using the tau = 1 strategy
   x <- NextMethod()
 
-  # Change weights to satisfy the constraints
-  x$weights <- x$weights / sqrt(x$M)
+  # Change lambda to satisfy the constraints
+  x$lambda <- x$lambda / sqrt(x$M)
   x$a <- x$a / sqrt(x$M)
   x$Y <- x$Y / sqrt(x$M)
   return(x)
@@ -106,6 +106,6 @@ block_init.separable_regularized_tensor_block <- function(x, init = "svd") {
     x$x <- mode_product(x$x, x$M[[m]], m = m + 1)
   }
 
-  # Initialize the factors and weights using the tau = 1 strategy
+  # Initialize the factors and lambda using the tau = 1 strategy
   NextMethod()
 }
