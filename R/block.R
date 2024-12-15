@@ -103,7 +103,7 @@ create_block <- function(x, j, bias, na.rm, tau, sparsity, ncomp, tol) {
 }
 
 create_sim_block <- function(x, j, bias, na.rm, tau, ncomp) {
-  if (NROW(x) > NCOL(x)) {
+  if (TRUE) {
     if (tau < 1) {
       res <- new_sim_primal_regularized_block(
         x, j, tau, bias = bias, na.rm = na.rm, ncomp = ncomp

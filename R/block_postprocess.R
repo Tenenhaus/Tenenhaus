@@ -31,3 +31,9 @@ block_postprocess.sparse_block <- function(x, ctrl) {
   }
   NextMethod()
 }
+
+#' @export
+block_postprocess.sim_primal_regularized_block <- function(x, ctrl) {
+  x$a <- x$M %*% x$a
+  NextMethod()
+}

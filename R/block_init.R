@@ -50,3 +50,13 @@ block_init.sim_block <- function(x, init = "svd") {
 
   return(block_project(x))
 }
+
+#' @export
+block_init.sim_primal_regularized_block <- function(x, init = "svd") {
+  x$M <- sqrt_matrix(
+    x$tau * diag(x$p) + (1 - x$tau) * pm(t(x$x), x$x, na.rm = x$na.rm) / x$N,
+    inv = TRUE
+  )
+  x$x <- pm(x$x, x$M, na.rm = x$na.rm)
+  NextMethod()
+}
