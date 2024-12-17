@@ -59,7 +59,12 @@ block_init.ac_block <- function(x, init = "svd") {
     na.rm = x$na.rm) #TODO should I use crossprod instead of pm?
   
   x$mu <- x$penalty_coef * 
+<<<<<<< HEAD
     eigen(x = x$B, symmetric = T, only.values = T)$values[1]
+=======
+    eigen(x = x$B, symmetric = T, only.values = T)$values[1] *
+    eigen(x = x$M_inv, symmetric = T, only.values = T)$values[1]
+>>>>>>> 9c9aadad608e602f237b0c0a94005d9896d929bb
   
   #NextMethod()
   
