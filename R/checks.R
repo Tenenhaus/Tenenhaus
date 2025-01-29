@@ -71,18 +71,72 @@ check_compx <- function(x, y, ncomp, blockx) {
 }
 
 check_confounders <- function(confounders, blocks){
-  if (!is.matrix(confounders)) stop_rgcca("confounders matrix must be a matrix", exit_code = 103) #TODO check exit_code
+  # Check that there is either a single matrix or a list of matrices
+  if (is.matrix(confounders) || is.data.frame(confounders)) {
+    confounders <- list(confounders)
+  }
+  if (is.list(confounders)) {
+    # Check that elements of the list are matrices
+    confounders <- lapply(confounders, function(x) {
+      if (is.matrix(x)) {
+        return(x)
+      }
+      if (is.data.frame(x)) {
+        return(data.matrix(x))
+      }
+      names_x <- names(x)
+      x <- data.matrix(x)
+      rownames(x) <- names_x
+      return(x)
+    })
+    
+    # Check length of the list
+    if (length(confounders) == 1 && length(blocks) != 1) {
+      confounders <- rep(confounders, length(blocks))
+    }
+    if (length(confounders) != length(blocks)) {
+      stop_rgcca("confounders list must be of length 1 or J")
+    }
+  } #TODO change this when there is a response block or with a superblock?
+
   #TODO are NA allowed?
-  #TODO check if nrow = n?
-  #TODO check rownames (compare with blocks)
+  #TODO check variable type of confounders?
+  #TODO check colnames?
+  #TODO check duplicated rownames?
+  #TODO add centering and scaling?
+
+  # Check that rownames are present and that all rows of blocks are present in confounders
+  aligned_rownames <- row.names(blocks[[1]])
   
-  is_K <- FALSE
-  # Check whether the matrix is K
-  if (isSymmetric.matrix(confounders)) is_K <- TRUE #TODO do I have to use fct unname like in check_connection?
-  #TODO need to check if the matrix is positive definite?
+  confounders <- lapply(confounders, function(x) {
+    if (is.null(row.names(x))) {
+      if (NROW(x) == NROW(blocks[[1]])) {
+        row.names(x) <- aligned_rownames
+      }
+      #stop_rgcca("matrix confounders must have rownames.")
+      #TODO change this behaviour?
+    }
+    if (!all(aligned_rownames %in% row.names(x))) {
+    stop_rgcca("matrix confounders must include the same rownames as blocks.")
+    }
+    return(x)
+  }) #TODO should I modify this behaviour when confounders is K?
   
-  # Compute linear kernel
-  if(is_K == FALSE) confounders <- tcrossprod(confounders)
+  #TODO should I allow missing rows and add rows of NAs? not if confounders is K
+  
+  # Check whether the matrix is K and compute linear kernel
+  confounders <- lapply(confounders, function(x) {
+    if (!isSymmetric.matrix(x)) { #TODO do I have to use fct unname like in check_connection?
+      #names_x <- row.names()
+      x <- tcrossprod(x)
+    }
+  })
+  #TODO check if K is positive definite?
+  
+  # Align rownames with blocks
+  confounders <- lapply(confounders, function(x) {
+    return(x[aligned_rownames, aligned_rownames])
+  })
   
   return(confounders)
 }
@@ -277,6 +331,21 @@ check_ncomp <- function(ncomp, blocks, min = 1, superblock = FALSE,
     FUN.VALUE = integer(1)
   )
   return(ncomp)
+}
+
+check_penalty_coef <- function(penalty_coef, blocks) {
+  penalty_coef <- elongate_arg(penalty_coef, blocks)
+  if (length(penalty_coef) != length(blocks)) {
+    stop_rgcca("penalty_coef must be of length 1 or J.")
+  }
+  
+  if (any(penalty_coef < 0)) {
+    stop_rgcca("penalty_coef must be non-negative.")
+  }
+  
+  #TODO any other checks?
+  #TODO print message if all coefs are = 0?
+  return(penalty_coef)
 }
 
 # Test on the sign of the correlation

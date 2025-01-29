@@ -47,7 +47,8 @@ new_sparse_block <- function(x, j, sparsity, tol = 1e-08, ...) {
 
 new_ac_block <- function(x, j, tau, confounders, penalty_coef, ...) {
   new_block(x, j, tau = tau, M = NULL, M_inv = NULL, B = NULL, 
-            f = NULL, sqrt_M = NULL, sqrt_M_inv = NULL, mu = NULL, 
+            f = NULL, sqrt_M = NULL, sqrt_M_inv = NULL, 
+            mu = NULL, f_left = NULL, f_right = NULL, 
             confounders = confounders, penalty_coef = penalty_coef, ..., 
             class = "ac_block")
 }
@@ -56,7 +57,7 @@ new_ac_block <- function(x, j, tau, confounders, penalty_coef, ...) {
 create_block <- function(x, j, bias, na.rm, tau, sparsity, tol, confounders, penalty_coef) {
   if (sparsity < 1) {
     res <- new_sparse_block(x, j, sparsity, tol, bias = bias, na.rm = na.rm)
-  } else if (!is.null(confounders)) {
+  } else if (!is.null(confounders) && (penalty_coef != 0)) {
     res <- new_ac_block(x, j, tau, confounders = confounders, penalty_coef = penalty_coef)
   } else if (NROW(x) > NCOL(x)) {
     if (tau < 1) {

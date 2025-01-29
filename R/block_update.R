@@ -16,30 +16,7 @@ block_update.dual_block <- function(x, grad) {
 
 #' @export
 block_update.ac_block <- function(x, grad) {
-<<<<<<< HEAD
-  x$f <- 1/(2 * x$mu) * (pm(x$sqrt_M_inv,
-                            pm(t(x$x),
-                               grad,
-                               na.rm = x$na.rm),
-                            na.rm = x$na.rm)
-                         - 2 * x$penalty_coef * pm(x$B,
-                                                   pm(x$sqrt_M,
-                                                      x$a,
-                                                      na.rm = x$na.rm),
-                                                   na.rm = x$na.rm))
-=======
-  x$f <- 1/(2 * x$mu) * pm(x$M_inv,
-                           (pm(x$sqrt_M_inv,
-                               pm(t(x$x),
-                                  grad,
-                                  na.rm = x$na.rm),
-                               na.rm = x$na.rm)
-                            - 2 * x$penalty_coef * pm(x$B,
-                                                      pm(x$sqrt_M,
-                                                         x$a,
-                                                         na.rm = x$na.rm),
-                                                      na.rm = x$na.rm)),
-                           na.rm = x$na.rm)
->>>>>>> 9c9aadad608e602f237b0c0a94005d9896d929bb
+  x$f <- pm(x$f_left, grad, na.rm = x$na.rm) -
+    pm(x$f_right, x$a, na.rm = x$na.rm)
   return(block_project(x))
 }

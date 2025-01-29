@@ -34,7 +34,7 @@ select_analysis <- function(rgcca_args, blocks) {
   confounders <- rgcca_args$confounders
   penalty_coef <- rgcca_args$penalty_coef
 
-  if (length(blocks) == 1) { #&& is.null(confounders)) {
+  if (length(blocks) == 1) {
     if (sparsity[1] == 1) {
       method <- "pca"
     } else {

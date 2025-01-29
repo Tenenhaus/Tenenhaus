@@ -61,13 +61,8 @@ block_project.ac_block <- function(x) {
     NextMethod()
   } else {
     v <- pm(x$sqrt_M, x$a, na.rm = x$na.rm)
-<<<<<<< HEAD
     x$a <- (x$sqrt_M_inv %*% x$f + x$a) / drop(sqrt(
       crossprod(x$f + v)))
-=======
-    x$a <- x$sqrt_M %*% (x$f + v) / drop(sqrt(
-      t(x$f + v) %*% x$M %*% x$M %*% (x$f + v)))
->>>>>>> 9c9aadad608e602f237b0c0a94005d9896d929bb
     
     x$Y <- pm(x$x, x$a, na.rm = x$na.rm)
     return(x)

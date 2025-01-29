@@ -1,4 +1,5 @@
 #' @importFrom MASS ginv
+#' @importFrom RSpectra eigs_sym
 
 block_init <- function(x, init = "svd") {
   print("block_init")
@@ -52,19 +53,20 @@ block_init.ac_block <- function(x, init = "svd") {
   x$sqrt_M <- sqrt_matrix(x$M)
   x$sqrt_M_inv <- sqrt_matrix(x$M_inv) #TODO check if result is the same with sqrt_matrix(x$M, inv = T)
 
-  XM_tmp <- pm(x$x, x$sqrt_M_inv, na.rm = x$na.rm)
+  P <- pm(x$x, x$sqrt_M_inv, na.rm = x$na.rm)
   x$B <- pm(
-    t(XM_tmp), pm(
-      x$confounders, XM_tmp, na.rm = x$na.rm), 
-    na.rm = x$na.rm) #TODO should I use crossprod instead of pm?
+    t(P), pm(
+      x$confounders, P, na.rm = x$na.rm), 
+    na.rm = x$na.rm)
   
-  x$mu <- x$penalty_coef * 
-<<<<<<< HEAD
-    eigen(x = x$B, symmetric = T, only.values = T)$values[1]
-=======
-    eigen(x = x$B, symmetric = T, only.values = T)$values[1] *
-    eigen(x = x$M_inv, symmetric = T, only.values = T)$values[1]
->>>>>>> 9c9aadad608e602f237b0c0a94005d9896d929bb
+  x$mu <- x$penalty_coef *
+    RSpectra::eigs_sym(A = x$B, k = 1, which = "LA", opts = list(retvec = F))$values
+  
+  print(RSpectra::eigs_sym(A = x$B, k = 1, which = "LA", opts = list(retvec = F))$values)
+  
+  x$f_left <- 1/(2 * x$mu) * t(P)
+  
+  x$f_right <- x$penalty_coef / x$mu * pm(x$B, x$sqrt_M, na.rm = x$na.rm)
   
   #NextMethod()
   

@@ -9,7 +9,8 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
                              na.rm = TRUE, superblock = FALSE,
                              response = NULL, disjunction = NULL,
                              n_iter_max = 1000, comp_orth = TRUE,
-                             confounders = NULL, penalty_coef = rep(0, length(blocks))) {
+                             confounders = NULL, 
+                             penalty_coef = rep(0, length(blocks))) {
   if (verbose) {
     scheme_str <- ifelse(is(scheme, "function"), "user-defined", scheme)
     cat(
@@ -74,6 +75,13 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
       nrow = N + 1, J, byrow = TRUE
     )
   }
+  
+  if (is.vector(penalty_coef)) {
+    penalty_coef <- matrix(
+      rep(penalty_coef, N + 1),
+      nrow = N + 1, J, byrow = TRUE
+    )
+  }
 
   # Whether primal or dual
   primal_dual <- matrix("primal", nrow = N + 1, ncol = J)
@@ -95,7 +103,7 @@ rgcca_outer_loop <- function(blocks, connection = 1 - diag(length(blocks)),
                                     init = init, bias = bias, tol = tol,
                                     verbose = verbose, na.rm = na.rm,
                                     n_iter_max = n_iter_max,
-                                    confounders, penalty_coef
+                                    confounders, penalty_coef = penalty_coef[n, ]
     )
 
     # Store tau, crit

@@ -16,16 +16,18 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
 
   ### Initialization
   block_objects <- lapply(seq_along(A), function(j) {
-    create_block(A[[j]], j, bias, na.rm, tau[j], sparsity[j], tol, confounders, penalty_coef)
+    create_block(A[[j]], j, bias, na.rm, tau[j], sparsity[j], tol, confounders[[j]], penalty_coef[j])
   })
   
   #block_objects <- lapply(block_objects, block_init, init = init) # somehow doesn't dispatch to block_init.ac_block()
   # temporary patch:
-  if (!is.null(confounders)) { 
-    block_objects <- lapply(block_objects, block_init.ac_block, init = init)
-  } else {
-    block_objects <- lapply(block_objects, block_init, init = init)
-  }
+  block_objects <- lapply(seq_along(block_objects), function(j) {
+    if (!is.null(block_objects[[j]]$confounders) && block_objects[[j]]$penalty_coef != 0) {
+      x <- block_init.ac_block(x = block_objects[[j]], init = init)
+    } else {
+      x <- block_init(x = block_objects[[j]], init = init)
+    }
+  })
 
   Y <- do.call(cbind, lapply(block_objects, "[[", "Y"))
   N <- block_objects[[1]]$N
@@ -33,9 +35,14 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
   iter <- 1
   crit <- NULL
   crit_old <- sum(C * g(crossprod(Y) / N))
-  if (!is.null(confounders)) {
+  
+  if (!is.null(confounders) && any(penalty_coef != 0)) {
     crit_second_part <- sum(unlist(lapply(seq_along(A), function(j) {
-      return(drop(penalty_coef * t(as.matrix(Y[, j])) %*% confounders %*% as.matrix(Y[, j]))) #TODO correct this after having elongated penalty_coef
+      if (!is.null(confounders[[j]]) && penalty_coef[j] != 0) {
+        return(drop(penalty_coef[j] * t(as.matrix(Y[, j])) %*% confounders[[j]] %*% as.matrix(Y[, j])))
+      } else {
+        return(0)
+      }
     })))
     crit_old <- crit_old - crit_second_part
   }
@@ -50,11 +57,15 @@ rgcca_inner_loop <- function(A, C, g, dg, tau = rep(1, length(A)),
     }
 
     # Print out intermediate fit
-    if (!is.null(confounders)) {
-      new_crit <- sum(C * g(crossprod(Y) / N)) - sum(unlist(lapply(seq_along(A), function(j) {
-        return(drop(penalty_coef * t(as.matrix(Y[, j])) %*% confounders %*% as.matrix(Y[, j]))) #TODO correct this after having elongated penalty_coef
+    if (!is.null(confounders) && any(penalty_coef != 0)) {
+      crit_second_part <- sum(unlist(lapply(seq_along(A), function(j) {
+        if (!is.null(confounders[[j]]) && penalty_coef[j] != 0) {
+          return(drop(penalty_coef[j] * t(as.matrix(Y[, j])) %*% confounders[[j]] %*% as.matrix(Y[, j])))
+        } else {
+          return(0)
+        }
       })))
-      crit <- c(crit, new_crit)
+      crit <- c(crit, sum(C * g(crossprod(Y) / N)) - crit_second_part)
     } else {
       crit <- c(crit, sum(C * g(crossprod(Y) / N)))
     }
