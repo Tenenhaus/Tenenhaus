@@ -60,3 +60,17 @@ block_init.sim_primal_regularized_block <- function(x, init = "svd") {
   x$x <- pm(x$x, x$M, na.rm = x$na.rm)
   NextMethod()
 }
+
+#' @export
+block_init.sim_response_block <- function(x, init = "svd") {
+  if (init == "svd") {
+    x$a <- matrix(
+      rep(initsvd(x$x, dual = FALSE, ncomp = 1), x$ncomp),
+      ncol = x$ncomp
+    )
+  } else {
+    x$a <- matrix(rnorm(x$p * x$ncomp), nrow = x$p)
+  }
+
+  return(block_project(x))
+}
