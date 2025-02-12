@@ -187,6 +187,7 @@ rgcca_cv <- function(blocks,
                      verbose = TRUE,
                      n_iter_max = 1000,
                      comp_orth = TRUE,
+                     simultaneous = FALSE,
                      ...) {
   ### Try to retrieve parameters from a rgcca object
   rgcca_args <- as.list(environment())
